@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #07090f; }
+  a { color: #ffd24a; text-decoration: none; }
+  a:hover { color: #fff0b8; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #24304d; border-radius: 8px; }
+  @keyframes ie-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+</style>
+</helmet>
+<div style="min-height:100vh;background:#07090f;color:#e6ecf5;font-family:'Sora',system-ui,sans-serif;display:flex;align-items:stretch">
+
+  <aside style="width:252px;flex:0 0 252px;background:#0a0d16;border-right:1px solid #161d30;padding:24px 16px 22px;display:flex;flex-direction:column;gap:28px;box-sizing:border-box">
+    <div style="display:flex;align-items:center;gap:12px;padding:0 4px">
+      <img src="ironeye-logo.png" alt="IronEye" style="width:54px;height:47px;flex:0 0 54px;object-fit:contain" />
+      <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+        <span style="font:700 18px/1 'Sora',sans-serif">IronEye</span>
+        <span style="font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#5b6884">V2 · CONTROL</span>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span style="font:500 9px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#4a5670;padding:0 10px">MONITOR</span>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <sc-for list="{{ nav }}" as="item" hint-placeholder-count="5">
+          <div onClick="{{ item.go }}" style="display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:11px;cursor:pointer;background:{{ item.bg }}" style-hover="background:#111726">
+            <span style="width:33px;height:33px;flex:0 0 33px;border-radius:10px;background:{{ item.badgeBg }};color:{{ item.badgeFg }};display:flex;align-items:center;justify-content:center;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.04em">{{ item.code }}</span>
+            <span style="flex:1;min-width:0;font:400 13px/1.35 'Sora',sans-serif;color:{{ item.fg }}">{{ item.label }}</span>
+            <span style="font:500 10px/1 'JetBrains Mono',monospace;color:{{ item.markColor }}">{{ item.mark }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:9px;padding:16px 12px 0;border-top:1px solid #161d30;font:400 10px/1.6 'JetBrains Mono',monospace;color:#4a5670">
+      <div style="display:flex;align-items:center;gap:7px">
+        <span style="width:7px;height:7px;border-radius:50%;background:#3ddc97;animation:ie-pulse 1.6s infinite"></span>
+        <span style="color:#3ddc97">LIVE · {{ clock }}</span>
+      </div>
+      <span>{{ siteName }}</span>
+      <span>Tinamics Co., Ltd.</span>
+    </div>
+  </aside>
+
+  <main style="flex:1;min-width:0;padding:28px 32px 48px;box-sizing:border-box;background:radial-gradient(1100px 520px at 75% -12%, #101a33 0%, #07090f 62%)">
+  <div style="max-width:1420px;display:flex;flex-direction:column;gap:20px">
+
+    <header style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;border-bottom:1px solid #1e2740;padding-bottom:18px">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font:600 24px/1.2 'Sora',sans-serif;letter-spacing:-.01em">{{ viewTitle }}</div>
+        <div style="font:400 11px/1.6 'JetBrains Mono',monospace;color:#6b7a96">{{ viewSub }}</div>
+      </div>
+      <div style="font:400 11px/1.7 'JetBrains Mono',monospace;color:#6b7a96;text-align:right">
+        <div>รอบสำรวจ Modbus <span style="color:#e6ecf5">5s</span> · เก็บ Firebase <span style="color:#e6ecf5">1m</span></div>
+        <div>เกณฑ์เตือน loss <span style="color:#ffd24a">{{ threshold }}%</span> · ความไว <span style="color:#ffd24a">{{ sensitivity }}</span></div>
+      </div>
+    </header>
+
+    <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:20px">
+
+      <section style="background:#0e1220;border:1px solid #1e2740;border-radius:14px;padding:16px 20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px">
+          <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#6b7a96">เส้นทางข้อมูล · Data Pipeline</div>
+          <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:#3ddc97">ทุกโหนดทำงานปกติ</div>
+        </div>
+        <div style="display:flex;align-items:stretch;gap:10px;flex-wrap:wrap">
+          <sc-for list="{{ hops }}" as="hop" hint-placeholder-count="5">
+            <div style="flex:1 1 170px;min-width:150px;background:#131829;border:1px solid #24304d;border-radius:11px;padding:13px 14px;display:flex;flex-direction:column;gap:7px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                <span style="font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#6b7a96">{{ hop.step }}</span>
+                <span style="width:6px;height:6px;border-radius:50%;background:#3ddc97"></span>
+              </div>
+              <div style="font:600 14px/1.25 'Sora',sans-serif">{{ hop.name }}</div>
+              <div style="font:400 10px/1.5 'JetBrains Mono',monospace;color:#6b7a96">{{ hop.detail }}</div>
+              <div style="font:500 11px/1 'JetBrains Mono',monospace;color:#4fc3f7">{{ hop.latency }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+        <sc-for list="{{ kpis }}" as="kpi" hint-placeholder-count="4">
+          <div style="background:#0e1220;border:1px solid #1e2740;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:10px">
+            <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#6b7a96">{{ kpi.label }}</div>
+            <div style="display:flex;align-items:baseline;gap:7px">
+              <span style="font:600 32px/1 'Sora',sans-serif;letter-spacing:-.02em">{{ kpi.value }}</span>
+              <span style="font:400 13px/1 'JetBrains Mono',monospace;color:#6b7a96">{{ kpi.unit }}</span>
+            </div>
+            <div style="font:400 11px/1.45 'JetBrains Mono',monospace;color:#8b9ab8">{{ kpi.note }}</div>
+          </div>
+        </sc-for>
+      </section>
+
+      <section style="display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+
+          <div style="background:#0e1220;border:1px solid #1e2740;border-radius:14px;padding:20px 22px">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px">
+              <div>
+                <div style="font:600 16px/1.3 'Sora',sans-serif">สมดุลพลังงาน 24 ชั่วโมง</div>
+                <div style="font:400 11px/1.6 'JetBrains Mono',monospace;color:#6b7a96;margin-top:4px">มิเตอร์หลัก (PAC3200) เทียบผลรวมมิเตอร์บ้านลูกค้า · ส่วนต่างที่อธิบายไม่ได้ = สงสัยขโมยไฟ</div>
+              </div>
+              <div style="display:flex;gap:22px">
+                <div>
+                  <div style="font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#6b7a96;margin-bottom:6px">LOSS ปัจจุบัน</div>
+                  <div style="font:600 22px/1 'Sora',sans-serif;color:#ff5570">{{ lossNow }}%</div>
+                </div>
+                <div>
+                  <div style="font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#6b7a96;margin-bottom:6px">เกณฑ์เตือน</div>
+                  <div style="font:600 22px/1 'Sora',sans-serif;color:#ffd24a">{{ threshold }}%</div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:5px;height:170px;padding-bottom:2px;border-bottom:1px solid #24304d">
+              <sc-for list="{{ bars }}" as="bar" hint-placeholder-count="24">
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%" title="{{ bar.tip }}">
+                  <div style="height:{{ bar.h }};background:{{ bar.color }};border-radius:4px 4px 2px 2px;min-height:3px"></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:9px;font:400 10px/1 'JetBrains Mono',monospace;color:#6b7a96">
+              <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>ปัจจุบัน</span>
+            </div>
+          </div>
+
+          <div style="background:#0e1220;border:1px solid #1e2740;border-radius:14px;padding:20px 22px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap">
+              <div style="font:600 16px/1.3 'Sora',sans-serif">บ้านที่ต้องตรวจสอบก่อน</div>
+              <div style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:#6b7a96">เรียงตามคะแนนความเสี่ยง</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1.6fr;gap:12px;padding:0 4px 10px;border-bottom:1px solid #24304d;font:500 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#6b7a96">
+              <span>บ้าน / มิเตอร์</span><span>โหลดจริง</span><span>คาดการณ์</span><span>ส่วนต่าง</span><span>สาเหตุที่ตรวจพบ</span>
+            </div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ topUnits }}" as="u" hint-placeholder-count="6">
+                <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1.6fr;gap:12px;align-items:center;padding:14px 4px;border-bottom:1px solid #161d30">
+                  <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+                    <span style="font:600 13px/1.3 'Sora',sans-serif">{{ u.name }}</span>
+                    <span style="font:400 10px/1 'JetBrains Mono',monospace;color:#6b7a96">{{ u.id }}</span>
+                  </div>
+                  <span style="font:500 13px/1 'JetBrains Mono',monospace">{{ u.load }}</span>
+                  <span style="font:400 13px/1 'JetBrains Mono',monospace;color:#8b9ab8">{{ u.expected }}</span>
+                  <span style="font:700 13px/1 'JetBrains Mono',monospace;color:{{ u.color }}">{{ u.dev }}</span>
+                  <div style="display:flex;align-items:center;gap:9px;min-width:0">
+                    <span style="font:500 9px/1 'JetBrains Mono',monospace;letter-spacing:.08em;padding:5px 8px;border-radius:5px;background:{{ u.badgeBg }};color:{{ u.color }};white-space:nowrap">{{ u.status }}</span>
+                    <span style="font:400 11px/1.4 'JetBrains Mono',monospace;color:#8b9ab8">{{ u.cause }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+          <div style="background:#0e1220;border:1px solid #1e2740;border-radius:14px;padding:20px 22px">
+            <div style="font:600 16px/1.3 'Sora',sans-serif;margin-bottom:4px">มิเตอร์หลัก 3 เฟส</div>
+            <div style="font:400 11px/1.6 'JetBrains Mono',monospace;color:#6b7a96;margin-bottom:16px">Sentron PAC3200 · Modbus/TCP · basic type 3</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ phases }}" as="p" hint-placeholder-count="3">
+                <div style="background:#131829;border:1px solid #24304d;border-left:3px solid {{ p.color }};border-radius:10px;padding:14px 16px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
+                    <span style="font:700 13px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:{{ p.color }}">{{ p.id }}</span>
+                    <span style="font:400 10px/1 'JetBrains Mono',monospace;color:#6b7a96">{{ p.state }}</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+                    <div style="display:flex;flex-direction:column;gap:5px">
+                      <span style="font:400 9px/1 'JetBrains Mono',monospace;color:#6b7a96">V</span>
+                      <span style="font:500 15px/1 'JetBrains Mono',monospace">{{ p.v }}</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:5px">
+                      <span style="font:400 9px/1 'JetBrains Mono',monospace;color:#6b7a96">A</span>
+                      <span style="font:500 15px/1 'JetBrains Mono',monospace">{{ p.i }}</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:5px">
+                      <span style="font:400 9px/1 'JetBrains Mono',monospace;color:#6b7a96">PF</span>
+                      <span style="font:500 15px/1 'JetBrains Mono',monospace">{{ p.pf }}</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:5px">
+                      <span style="font:400 9px/1 'JetBrains Mono',monospace;color:#6b7a96">THD</span>
+                      <span style="font:500 15px/1 'JetBrains Mono',monospace">{{ p.thd }}</span>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid #24304d">
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#6b7a96">ความไม่สมดุลกระแส</span>
+                <span style="font:600 18px/1 'Sora',sans-serif;color:#ffd24a">{{ unbalance }}%</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#6b7a96">ความถี่ระบบ</span>
+                <span style="font:600 18px/1 'Sora',sans-serif">{{ freq }} Hz</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#0e1220;border:1px solid #1e2740;border-radius:14px;padding:18px 22px;display:flex;flex-direction:column;gap:12px">
+            <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#6b7a96">ปลายทางการแจ้งเตือน</div>
+            <div style="display:flex;flex-direction:column;gap:9px;font:400 11px/1.5 'JetBrains Mono',monospace;color:#8b9ab8">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>n8n.jupetor-cmms.com</span><span style="color:#3ddc97">เชื่อมต่อแล้ว</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>สร้าง Work Order (CMMS)</span><span style="color:#3ddc97">อัตโนมัติ</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>LINE Notify — ทีมช่าง</span><span style="color:#3ddc97">เปิดใช้งาน</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isHomes }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <sc-for list="{{ homeStats }}" as="s" hint-placeholder-count="4">
+          <div style="background:#0e1220;border:1px solid #1e2740;border-radius:11px;padding:11px 16px;display:flex;align-items:center;gap:10px">
+            <span style="width:8px;height:8px;border-radius:50%;background:{{ s.color }}"></span>
+            <span style="font:400 11px/1 'JetBrains Mono',monospace;color:#8b9ab8">{{ s.label }}</span>
+            <span style="font:600 15px/1 'Sora',sans-serif;color:{{ s.color }}">{{ s.count }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px">
+        <sc-for list="{{ homes }}" as="h" hint-placeholder-count="9">
+          <div style="background:#0e1220;border:1px solid #1e2740;border-left:3px solid {{ h.color }};border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+              <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+                <span style="font:600 16px/1.3 'Sora',sans-serif">{{ h.place }}</span>
+                <span style="font:400 10px/1 'JetBrains Mono',monospace;color:#6b7a96">{{ h.owner }}</span>
+              </div>
+              <span style="font:500 9px/1 'JetBrains Mono',monospace;letter-spacing:.08em;padding:6px 9px;border-radius:6px;background:{{ h.badgeBg }};color:{{ h.color }};white-space:nowrap">{{ h.status }}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <span style="font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:#6b7a96">โหลดปัจจุบัน</span>
+                <span style="font:600 19px/1 'Sora',sans-serif">{{ h.load }}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <span style="font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:#6b7a96">ต่างจากค่าปกติ</span>
+                <span style="font:600 19px/1 'Sora',sans-serif;color:{{ h.color }}">{{ h.dev }}</span>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;padding-top:13px;border-top:1px solid #1e2740;font:400 10px/1.4 'JetBrains Mono',monospace;color:#8b9ab8">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>มิเตอร์</span><span style="color:#e6ecf5">{{ h.id }} · {{ h.model }}</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>หน่วยสะสม</span><span style="color:#e6ecf5">{{ h.kwh }}</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>อ่านค่าล่าสุด</span><span style="color:#e6ecf5">{{ h.lastCheck }}</span></div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <span style="font:400 11px/1.5 'Sora',sans-serif;color:#8b9ab8;min-width:0">{{ h.note }}</span>
+              <div onClick="{{ h.onEdit }}" style="border:1px solid #24304d;color:#4fc3f7;border-radius:7px;padding:7px 12px;font:500 10px/1 'JetBrains Mono',monospace;cursor:pointer;white-space:nowrap" style-hover="border-color:#4fc3f7">ตั้งค่า</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isMeters }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#0e1220;border:1px solid #1e2740;border-radius:14px;padding:20px 22px">
+      <div style="display:grid;grid-template-columns:1.3fr 1.4fr 1.2fr 1fr .8fr 1fr .9fr;gap:12px;padding:0 4px 12px;border-bottom:1px solid #24304d;font:500 9px/1.4 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#6b7a96">
+        <span>มิเตอร์</span><span>บ้าน / ลูกค้า</span><span>รุ่น</span><span>โปรโตคอล</span><span>โหลด</span><span>หน่วยสะสม</span><span>สถานะ</span>
+      </div>
+      <div style="display:flex;flex-direction:column">
+        <sc-for list="{{ devices }}" as="m" hint-placeholder-count="12">
+          <div style="display:grid;grid-template-columns:1.3fr 1.4fr 1.2fr 1fr .8fr 1fr .9fr;gap:12px;align-items:center;padding:14px 4px;border-bottom:1px solid #161d30">
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+              <span style="font:600 13px/1.3 'Sora',sans-serif">{{ m.id }}</span>
+              <span style="font:400 10px/1 'JetBrains Mono',monospace;color:#6b7a96">{{ m.role }}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+              <span style="font:400 12px/1.3 'Sora',sans-serif;color:#c3cee0">{{ m.place }}</span>
+              <span style="font:400 10px/1 'JetBrains Mono',monospace;color:#6b7a96">{{ m.owner }}</span>
+            </div>
+            <span style="font:400 11px/1.4 'JetBrains Mono',monospace;color:#8b9ab8">{{ m.model }}</span>
+            <span style="font:400 11px/1.4 'JetBrains Mono',monospace;color:#8b9ab8">{{ m.proto }}</span>
+            <span style="font:500 12px/1 'JetBrains Mono',monospace">{{ m.load }}</span>
+            <span style="font:400 12px/1 'JetBrains Mono',monospace;color:#c3cee0">{{ m.kwh }}</span>
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:{{ m.color }}"></span>
+              <span style="font:400 10px/1.3 'JetBrains Mono',monospace;color:{{ m.color }}">{{ m.status }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="margin-top:16px;font:400 10px/1.6 'JetBrains Mono',monospace;color:#5b6884">1 มิเตอร์ = 1 บ้านลูกค้า · อ่านค่าผ่าน Node-RED ทุก 5 วินาที · เขียนลง Firebase ทุก 1 นาที · หน่วยสะสมอ่านจาก register 2801–2820</div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isAlerts }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="5">
+        <div style="background:#0e1220;border:1px solid #1e2740;border-left:3px solid {{ a.color }};border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.1em;padding:6px 10px;border-radius:6px;background:{{ a.badgeBg }};color:{{ a.color }}">{{ a.kind }}</span>
+            <span style="font:400 10px/1 'JetBrains Mono',monospace;color:#6b7a96">{{ a.time }}</span>
+          </div>
+          <div style="font:400 14px/1.6 'Sora',sans-serif;color:#e6ecf5;max-width:78ch">{{ a.msg }}</div>
+          <div style="font:400 10px/1.5 'JetBrains Mono',monospace;color:#8b9ab8">{{ a.meta }}</div>
+        </div>
+      </sc-for>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:18px">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div style="font:400 11px/1.6 'JetBrains Mono',monospace;color:#6b7a96">อุปกรณ์ในระบบ <span style="color:#e6ecf5">{{ deviceCount }}</span> ตัว · เป็นบ้านลูกค้า <span style="color:#e6ecf5">{{ homeCount }}</span> หลัง</div>
+        <div onClick="{{ addNew }}" style="background:#ffd24a;color:#1a1400;border-radius:10px;padding:11px 18px;font:600 12px/1 'Sora',sans-serif;cursor:pointer" style-hover="background:#ffe17d">+ เพิ่มมิเตอร์ / บ้านลูกค้า</div>
+      </div>
+
+      <sc-if value="{{ draftOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#0e1220;border:1px solid #2c3a5c;border-radius:14px;padding:22px 24px;display:flex;flex-direction:column;gap:18px">
+        <div style="font:600 16px/1.3 'Sora',sans-serif">{{ draftTitle }}</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px">
+          <sc-for list="{{ draftFields }}" as="fl" hint-placeholder-count="8">
+            <label style="display:flex;flex-direction:column;gap:7px">
+              <span style="font:500 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#6b7a96">{{ fl.label }}</span>
+              <input value="{{ fl.value }}" onChange="{{ fl.onChange }}" placeholder="{{ fl.hint }}" style="width:100%;box-sizing:border-box;background:#131829;border:1px solid #24304d;border-radius:9px;padding:11px 13px;color:#e6ecf5;font:400 12px/1.3 'JetBrains Mono',monospace;outline:none" style-focus="border-color:#4fc3f7" />
+            </label>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <span style="font:500 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#6b7a96">ประเภทอุปกรณ์</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ kindChips }}" as="c" hint-placeholder-count="4">
+              <div onClick="{{ c.go }}" style="border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.fg }};border-radius:8px;padding:9px 14px;font:500 11px/1 'JetBrains Mono',monospace;cursor:pointer">{{ c.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <span style="font:500 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#6b7a96">สถานะ</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ statusChips }}" as="c" hint-placeholder-count="4">
+              <div onClick="{{ c.go }}" style="border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.fg }};border-radius:8px;padding:9px 14px;font:500 11px/1 'JetBrains Mono',monospace;cursor:pointer">{{ c.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;padding-top:6px">
+          <div onClick="{{ saveDraft }}" style="background:#3ddc97;color:#05241a;border-radius:10px;padding:11px 20px;font:600 12px/1 'Sora',sans-serif;cursor:pointer" style-hover="background:#65e8b0">บันทึก</div>
+          <div onClick="{{ cancelDraft }}" style="border:1px solid #24304d;color:#8b9ab8;border-radius:10px;padding:11px 20px;font:500 12px/1 'Sora',sans-serif;cursor:pointer" style-hover="border-color:#3a4a70;color:#e6ecf5">ยกเลิก</div>
+        </div>
+      </div>
+      </sc-if>
+
+      <div style="background:#0e1220;border:1px solid #1e2740;border-radius:14px;padding:20px 22px">
+        <div style="display:grid;grid-template-columns:1.2fr 1.4fr 1fr .9fr .9fr 1.1fr;gap:12px;padding:0 4px 12px;border-bottom:1px solid #24304d;font:500 9px/1.4 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#6b7a96">
+          <span>มิเตอร์</span><span>บ้าน / ลูกค้า</span><span>ประเภท</span><span>โปรโตคอล</span><span>สถานะ</span><span style="text-align:right">จัดการ</span>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <sc-for list="{{ devices }}" as="m" hint-placeholder-count="12">
+            <div style="display:grid;grid-template-columns:1.2fr 1.4fr 1fr .9fr .9fr 1.1fr;gap:12px;align-items:center;padding:13px 4px;border-bottom:1px solid #161d30">
+              <span style="font:600 13px/1.3 'Sora',sans-serif">{{ m.id }}</span>
+              <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+                <span style="font:400 12px/1.3 'Sora',sans-serif;color:#c3cee0">{{ m.place }}</span>
+                <span style="font:400 10px/1 'JetBrains Mono',monospace;color:#6b7a96">{{ m.owner }}</span>
+              </div>
+              <span style="font:400 11px/1.4 'JetBrains Mono',monospace;color:#8b9ab8">{{ m.role }}</span>
+              <span style="font:400 11px/1.4 'JetBrains Mono',monospace;color:#8b9ab8">{{ m.proto }}</span>
+              <div style="display:flex;align-items:center;gap:7px">
+                <span style="width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:{{ m.color }}"></span>
+                <span style="font:400 10px/1.3 'JetBrains Mono',monospace;color:{{ m.color }}">{{ m.status }}</span>
+              </div>
+              <div style="display:flex;gap:8px;justify-content:flex-end">
+                <div onClick="{{ m.onEdit }}" style="border:1px solid #24304d;color:#4fc3f7;border-radius:7px;padding:7px 12px;font:500 10px/1 'JetBrains Mono',monospace;cursor:pointer" style-hover="border-color:#4fc3f7">แก้ไข</div>
+                <div onClick="{{ m.onDelete }}" style="border:1px solid #3a1420;color:#ff5570;border-radius:7px;padding:7px 12px;font:500 10px/1 'JetBrains Mono',monospace;cursor:pointer" style-hover="border-color:#ff5570">ลบ</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+  </div>
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;siteName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;หมู่บ้านศรีสุข เฟส 2&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;lossThresholdPct&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:5,&quot;min&quot;:1,&quot;max&quot;:15,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;ตรรกะจับขโมยไฟ&quot;},&quot;theftSensitivity&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;กลาง&quot;,&quot;options&quot;:[&quot;ต่ำ&quot;,&quot;กลาง&quot;,&quot;สูง&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;ตรรกะจับขโมยไฟ&quot;}}">
+class Component extends DCLogic {
+  state = { tick: 0, view: 'overview', list: null, draft: null, draftIndex: -1 };
+
+  componentDidMount() {
+    this.iv = setInterval(() => this.setState(s => ({ tick: s.tick + 1 })), 2500);
+  }
+  componentWillUnmount() { clearInterval(this.iv); }
+
+  seed() {
+    return [
+      { id: 'PAC-MAIN-01', kind: 'main', owner: 'การไฟฟ้า — จุดรับไฟโครงการ', place: 'ตู้ MDB หน้าโครงการ', model: 'Sentron PAC3200', proto: 'Modbus/TCP', status: 'ออนไลน์', loadKw: 41.0, expectedKw: 41.0, kwh: 184220, lastCheck: 'เมื่อ 3 วินาที', note: 'มิเตอร์ต้นทางที่ใช้เทียบสมดุลพลังงาน' },
+      { id: 'PAC-ZONE-A', kind: 'zone', owner: 'มิเตอร์รวมโซน A', place: 'ตู้ย่อยโซน A', model: 'Sentron PAC4200', proto: 'Modbus/TCP', status: 'ออนไลน์', loadKw: 18.2, expectedKw: 18.0, kwh: 61905, lastCheck: 'เมื่อ 4 วินาที', note: 'รวมบ้านโซน A จำนวน 5 หลัง' },
+      { id: 'CT-FEEDER-01', kind: 'ct', owner: 'CT วัดฟีดเดอร์ต้นทาง', place: 'เสาต้นทางเข้าโครงการ', model: 'SCT-013 + Shelly EM', proto: 'MQTT', status: 'ออนไลน์', loadKw: 41.6, expectedKw: 41.0, kwh: 186004, lastCheck: 'เมื่อ 6 วินาที', note: 'ใช้ตรวจการลักไฟก่อนถึงมิเตอร์หลัก' },
+      { id: 'MTR-0142', kind: 'home', owner: 'คุณสมชาย ทองดี', place: 'บ้านเลขที่ 88/12', model: 'Schneider iEM3155', proto: 'Modbus RTU', status: 'ค่าผิดปกติ', loadKw: 6.4, expectedKw: 2.1, kwh: 9612, lastCheck: '2 นาทีที่แล้ว', note: 'กระแสไหลย้อนช่วงกลางคืน ต้องเข้าตรวจหน้างาน' },
+      { id: 'MTR-0117', kind: 'home', owner: 'คุณวิภา แสงจันทร์', place: 'บ้านเลขที่ 72/5', model: 'Schneider iEM3155', proto: 'Modbus RTU', status: 'ค่าผิดปกติ', loadKw: 0.3, expectedKw: 3.8, kwh: 4041, lastCheck: '18 นาทีที่แล้ว', note: 'มิเตอร์อ่านต่ำผิดปกติ 9 วันติด สงสัยกลับขั้ว' },
+      { id: 'MTR-0203', kind: 'home', owner: 'ร้านป้าแดง', place: 'ร้านค้า 15/1', model: 'Mikro DPM380', proto: 'Modbus RTU', status: 'เฝ้าระวัง', loadKw: 11.2, expectedKw: 8.9, kwh: 22480, lastCheck: '46 นาทีที่แล้ว', note: 'PF ตกเหลือ 0.61 กะทันหัน อาจต่อโหลดเพิ่มโดยไม่แจ้ง' },
+      { id: 'MTR-0088', kind: 'home', owner: 'คุณอนุชา พรมมา', place: 'บ้านเลขที่ 41/3', model: 'Mikro DPM380', proto: 'Modbus RTU', status: 'ขาดการติดต่อ', loadKw: 2.8, expectedKw: 2.6, kwh: 7288, lastCheck: '1 ชม. 12 นาที', note: 'มิเตอร์ตัดการเชื่อมต่อ 3 ครั้งใน 24 ชม.' },
+      { id: 'MTR-0175', kind: 'home', owner: 'คุณมานี ใจดี', place: 'บ้านเลขที่ 103/8', model: 'Schneider iEM3155', proto: 'Modbus RTU', status: 'ออนไลน์', loadKw: 4.1, expectedKw: 3.9, kwh: 8402, lastCheck: 'เมื่อ 5 วินาที', note: 'อยู่ในเกณฑ์ปกติทั้งเดือน' },
+      { id: 'MTR-0061', kind: 'home', owner: 'คุณประยูร สุขใจ', place: 'บ้านเลขที่ 29/2', model: 'Schneider iEM3155', proto: 'Modbus RTU', status: 'ออนไลน์', loadKw: 3.5, expectedKw: 3.4, kwh: 6351, lastCheck: 'เมื่อ 5 วินาที', note: 'อยู่ในเกณฑ์ปกติทั้งเดือน' },
+      { id: 'MTR-0099', kind: 'home', owner: 'คุณกนกวรรณ ศรีสุข', place: 'บ้านเลขที่ 55/7', model: 'Mikro DPM380', proto: 'Modbus RTU', status: 'ออนไลน์', loadKw: 2.2, expectedKw: 2.4, kwh: 4236, lastCheck: 'เมื่อ 7 วินาที', note: 'อยู่ในเกณฑ์ปกติทั้งเดือน' },
+      { id: 'MTR-0034', kind: 'home', owner: 'คุณธนา บุญมี', place: 'บ้านเลขที่ 12/4', model: 'Mikro DPM380', proto: 'Modbus RTU', status: 'เฝ้าระวัง', loadKw: 5.6, expectedKw: 4.3, kwh: 11574, lastCheck: 'เมื่อ 5 วินาที', note: 'โหลดสูงขึ้น 30% หลังติดตั้งเครื่องปรับอากาศใหม่' },
+      { id: 'MTR-0158', kind: 'home', owner: 'คุณสุนีย์ วงศ์ไทย', place: 'บ้านเลขที่ 96/1', model: 'Schneider iEM3155', proto: 'Modbus RTU', status: 'ออนไลน์', loadKw: 1.9, expectedKw: 2.0, kwh: 3198, lastCheck: 'เมื่อ 8 วินาที', note: 'อยู่ในเกณฑ์ปกติทั้งเดือน' }
+    ];
+  }
+
+  renderVals() {
+    const t = this.state.tick;
+    const view = this.state.view;
+    const thr = Number(this.props.lossThresholdPct ?? 5);
+    const sens = this.props.theftSensitivity ?? 'กลาง';
+    const kSens = sens === 'สูง' ? 0.65 : sens === 'ต่ำ' ? 1.5 : 1;
+    const w = (i, a) => Math.sin((t + i * 6.3) / 5.5) * a;
+    const f = (v, d = 1) => Number(v).toFixed(d);
+    const RED = '#ff5570', AMBER = '#ffd24a', GREEN = '#3ddc97', CYAN = '#4fc3f7';
+    const statusColor = s => s === 'ออนไลน์' ? GREEN : s === 'เฝ้าระวัง' ? AMBER : s === 'ค่าผิดปกติ' ? RED : CYAN;
+    const kindLabel = { main: 'มิเตอร์หลัก 3 เฟส', zone: 'มิเตอร์รวมโซน', home: 'บ้านลูกค้า', ct: 'CT วัดฟีดเดอร์' };
+
+    const raw = this.state.list ?? this.seed();
+    const commit = list => this.setState({ list });
+
+    const devices = raw.map((m, i) => {
+      const load = Number(m.loadKw) + w(i + 3, 0.18);
+      return {
+        ...m,
+        role: kindLabel[m.kind] ?? 'อุปกรณ์วัด',
+        load: f(load) + ' kW',
+        loadNum: load,
+        kwh: Number(m.kwh).toLocaleString('en-US') + ' kWh',
+        color: statusColor(m.status),
+        onEdit: () => this.setState({ view: 'settings', draft: { ...m }, draftIndex: i }),
+        onDelete: () => commit(raw.filter((_, j) => j !== i))
+      };
+    });
+
+    const homes = devices.filter(m => m.kind === 'home').map(m => {
+      const devPct = (m.loadNum - Number(m.expectedKw)) / Math.max(0.4, Number(m.expectedKw)) * 100;
+      const mag = Math.abs(devPct) * kSens;
+      const devLevel = mag > 60 ? 2 : mag > 25 ? 1 : 0;
+      const commsLevel = m.status === 'ค่าผิดปกติ' ? 2 : (m.status === 'ขาดการติดต่อ' || m.status === 'เฝ้าระวัง') ? 1 : 0;
+      const level = Math.max(devLevel, commsLevel);
+      const color = level === 2 ? RED : level === 1 ? AMBER : GREEN;
+      return {
+        ...m,
+        status: level === 2 ? 'สงสัยขโมยไฟ' : level === 1 ? 'เฝ้าระวัง' : 'ปกติ',
+        color,
+        badgeBg: level === 2 ? '#3a0f1a' : level === 1 ? '#33280a' : '#14251d',
+        dev: (devPct >= 0 ? '+' : '') + f(devPct, 0) + '%',
+        expected: f(m.expectedKw) + ' kW',
+        cause: m.note.length > 42 ? m.note.slice(0, 40) + '…' : m.note,
+        name: m.place,
+        level
+      };
+    }).sort((a, b) => b.level - a.level);
+
+    const topUnits = homes.slice(0, 6);
+    const homeStats = [
+      { label: 'บ้านทั้งหมด', count: homes.length, color: CYAN },
+      { label: 'สงสัยขโมยไฟ', count: homes.filter(h => h.level === 2).length, color: RED },
+      { label: 'เฝ้าระวัง', count: homes.filter(h => h.level === 1).length, color: AMBER },
+      { label: 'ปกติ', count: homes.filter(h => h.level === 0).length, color: GREEN }
+    ];
+
+    const mainDev = devices.find(m => m.kind === 'main');
+    const mainKw = mainDev ? mainDev.loadNum : 0;
+    const subKw = homes.reduce((a, h) => a + h.loadNum, 0);
+    const lossKw = Math.max(0, mainKw - subKw);
+    const lossNow = mainKw > 0 ? f(lossKw / mainKw * 100) : '0.0';
+
+    const phaseDefs = [
+      { id: 'L1 — A', color: AMBER, v: 230.6, i: 42.4, pf: 0.96, thd: 2.3 },
+      { id: 'L2 — B', color: CYAN, v: 229.1, i: 38.9, pf: 0.94, thd: 2.8 },
+      { id: 'L3 — C', color: '#a78bfa', v: 231.4, i: 55.1, pf: 0.89, thd: 4.1 }
+    ];
+    const phases = phaseDefs.map((p, idx) => ({
+      id: p.id, color: p.color,
+      v: f(p.v + w(idx + 4, 1.3)) + ' V',
+      i: f(p.i + w(idx + 1, 2.4)) + ' A',
+      pf: f(p.pf + w(idx + 9, 0.015), 2),
+      thd: f(p.thd + w(idx + 12, 0.4)) + '%',
+      state: idx === 2 ? 'โหลดสูงกว่าเฟสอื่น' : 'ปกติ'
+    }));
+    const currents = phaseDefs.map((p, idx) => p.i + w(idx + 1, 2.4));
+    const avgI = currents.reduce((a, b) => a + b, 0) / 3;
+    const unbalance = f((Math.max(...currents) - avgI) / avgI * 100);
+
+    const bars = Array.from({ length: 24 }, (_, h) => {
+      const base = 2.1 + Math.sin(h / 3.4) * 0.9;
+      const spike = h >= 19 || h <= 2 ? 3.6 : 0;
+      const val = Math.max(0.4, base + spike + Math.sin((h + t) / 4) * 0.35);
+      return {
+        h: Math.min(100, val / 9 * 100).toFixed(1) + '%',
+        color: val > thr ? RED : val > thr * 0.7 ? AMBER : '#2e6b57',
+        tip: String(h).padStart(2, '0') + ':00 — loss ' + f(val) + '%'
+      };
+    });
+
+    const addNew = () => this.setState({
+      draft: { id: '', kind: 'home', owner: '', place: '', model: 'Schneider iEM3155', proto: 'Modbus RTU', status: 'ออนไลน์', loadKw: 0, expectedKw: 0, kwh: 0, lastCheck: 'ยังไม่เคยอ่านค่า', note: 'เพิ่มใหม่ รอข้อมูลจาก Node-RED' },
+      draftIndex: -1
+    });
+    const setField = (k, v) => this.setState(s => ({ draft: { ...s.draft, [k]: v } }));
+    const saveDraft = () => {
+      const d = this.state.draft;
+      if (!d || !String(d.id).trim()) return;
+      const rec = { ...d, loadKw: parseFloat(d.loadKw) || 0, expectedKw: parseFloat(d.expectedKw) || 0, kwh: parseFloat(String(d.kwh).replace(/[^0-9.]/g, '')) || 0 };
+      const list = [...raw];
+      if (this.state.draftIndex >= 0) list[this.state.draftIndex] = rec; else list.push(rec);
+      this.setState({ list, draft: null, draftIndex: -1 });
+    };
+    const cancelDraft = () => this.setState({ draft: null, draftIndex: -1 });
+
+    const d = this.state.draft;
+    const dv = d ?? { id: '', kind: 'home', owner: '', place: '', model: '', proto: '', status: 'ออนไลน์', loadKw: '', expectedKw: '', kwh: '' };
+    const draftFields = [
+      ['id', 'รหัสมิเตอร์', 'MTR-0210'],
+      ['owner', 'ชื่อลูกค้า', 'คุณสมหญิง ใจงาม'],
+      ['place', 'บ้านเลขที่ / ตำแหน่ง', 'บ้านเลขที่ 77/9'],
+      ['model', 'รุ่นมิเตอร์', 'Schneider iEM3155'],
+      ['proto', 'โปรโตคอล', 'Modbus RTU'],
+      ['loadKw', 'โหลดปัจจุบัน (kW)', '3.5'],
+      ['expectedKw', 'ค่าปกติคาดการณ์ (kW)', '3.2'],
+      ['kwh', 'หน่วยสะสม (kWh)', '0']
+    ].map(([k, label, hint]) => ({
+      label, hint, value: String(dv[k] ?? ''),
+      onChange: e => setField(k, e.target.value)
+    }));
+    const chip = (on, c) => ({ bg: on ? '#131829' : 'transparent', border: on ? c : '#24304d', fg: on ? c : '#6b7a96' });
+    const kindChips = ['home', 'main', 'zone', 'ct'].map(k => ({
+      label: kindLabel[k], ...chip(dv.kind === k, CYAN), go: () => setField('kind', k)
+    }));
+    const statusChips = ['ออนไลน์', 'เฝ้าระวัง', 'ค่าผิดปกติ', 'ขาดการติดต่อ'].map(s => ({
+      label: s, ...chip(dv.status === s, statusColor(s)), go: () => setField('status', s)
+    }));
+
+    const alerts = [
+      { kind: 'สงสัยขโมยไฟ', color: RED, badgeBg: '#3a0f1a', time: '2 นาทีที่แล้ว', msg: 'ตรวจพบกระแสไหลย้อนที่ MTR-0142 ขณะที่มิเตอร์หลักยังจ่ายโหลดปกติ', meta: 'บ้านเลขที่ 88/12 · คุณสมชาย ทองดี · สร้าง WO-2481 ผ่าน n8n แล้ว' },
+      { kind: 'ค่าเป็นลบ', color: RED, badgeBg: '#3a0f1a', time: '18 นาทีที่แล้ว', msg: 'MTR-0117 รายงานพลังงานสะสมลดลง — เป็นสัญญาณของการกลับขั้วมิเตอร์', meta: 'บ้านเลขที่ 72/5 · คุณวิภา แสงจันทร์ · รอช่างยืนยันหน้างาน' },
+      { kind: 'PF ผิดปกติ', color: AMBER, badgeBg: '#33280a', time: '46 นาทีที่แล้ว', msg: 'Power factor ร้านค้า 15/1 ตกจาก 0.94 เหลือ 0.61 ภายใน 4 นาที', meta: 'MTR-0203 · ร้านป้าแดง · เฝ้าระวัง 24 ชม.' },
+      { kind: 'มิเตอร์ขาดการติดต่อ', color: CYAN, badgeBg: '#0d2436', time: '1 ชม. 12 นาที', msg: 'MTR-0088 หลุดจาก Modbus 3 ครั้ง ครั้งละ 40–90 วินาที', meta: 'บ้านเลขที่ 41/3 · ตรวจสอบสาย RS-485 และแหล่งจ่ายไฟของมิเตอร์' },
+      { kind: 'Loss เกินเกณฑ์', color: AMBER, badgeBg: '#33280a', time: '3 ชม.', msg: 'ส่วนต่างพลังงานหลัก–บ้านลูกค้าแตะ ' + f(thr + 2.4) + '% ในช่วง 22:00–01:00', meta: 'ค่าเกณฑ์ที่ตั้งไว้ ' + thr + '%' }
+    ];
+
+    const hops = [
+      { step: '01', name: 'มิเตอร์ 3 เฟส', detail: 'PAC3200 · Modbus/TCP', latency: 'poll 5 s' },
+      { step: '02', name: 'Node-RED (Local)', detail: 'อ่าน register + ทำ scaling', latency: '12 ms' },
+      { step: '03', name: 'Firebase RTDB', detail: 'เก็บ time-series + สถานะ', latency: '84 ms' },
+      { step: '04', name: 'n8n Workflow', detail: 'n8n.jupetor-cmms.com', latency: '210 ms' },
+      { step: '05', name: 'IronEye Web', detail: 'Dashboard + แจ้งเตือน', latency: 'realtime' }
+    ];
+
+    const online = devices.filter(m => m.status !== 'ขาดการติดต่อ').length;
+    const kpis = [
+      { label: 'โหลดมิเตอร์หลัก', value: f(mainKw), unit: 'kW', note: 'ผลรวมบ้านลูกค้า ' + f(subKw) + ' kW' },
+      { label: 'พลังงานที่หายไป', value: f(lossKw, 2), unit: 'kW', note: 'คิดเป็น ' + lossNow + '% ของโหลดหลัก' },
+      { label: 'บ้านที่ต้องตรวจสอบ', value: String(homes.filter(h => h.level > 0).length), unit: 'หลัง', note: 'จาก ' + homes.length + ' หลังที่ติดตั้งมิเตอร์' },
+      { label: 'อุปกรณ์ออนไลน์', value: online + '/' + devices.length, unit: '', note: devices.length - online > 0 ? 'มีอุปกรณ์ขาดการติดต่อ ' + (devices.length - online) + ' ตัว' : 'ทุกตัวเชื่อมต่อปกติ' }
+    ];
+
+    const navDefs = [
+      { key: 'overview', code: 'DB', label: 'ภาพรวม' },
+      { key: 'homes', code: 'HM', label: 'รายการบ้านลูกค้า', mark: String(homes.filter(h => h.level === 2).length), markColor: RED },
+      { key: 'meters', code: 'MT', label: 'มิเตอร์ทั้งหมด' },
+      { key: 'alerts', code: 'AL', label: 'แจ้งเตือน', mark: String(alerts.length), markColor: RED },
+      { key: 'settings', code: 'SG', label: 'ตั้งค่ามิเตอร์' }
+    ];
+    const nav = navDefs.map(n => {
+      const on = view === n.key;
+      return {
+        code: n.code, label: n.label,
+        mark: on ? '•' : (n.mark ?? ''),
+        markColor: on ? CYAN : (n.markColor ?? '#6b7a96'),
+        bg: on ? '#111a2b' : 'transparent',
+        fg: on ? '#e6ecf5' : '#8b9ab8',
+        badgeBg: on ? '#123047' : '#141b2c',
+        badgeFg: on ? CYAN : '#6b7a96',
+        go: () => this.setState({ view: n.key })
+      };
+    });
+
+    const titles = {
+      overview: ['ภาพรวมระบบ', 'สมดุลพลังงาน มิเตอร์หลัก 3 เฟส และการแจ้งเตือนแบบเรียลไทม์'],
+      homes: ['รายการบ้านลูกค้า', '1 มิเตอร์ = 1 บ้านลูกค้า · เรียงบ้านที่สงสัยขโมยไฟขึ้นก่อน'],
+      meters: ['มิเตอร์ทั้งหมด', 'อุปกรณ์วัดทุกตัวในระบบ พร้อมบ้านลูกค้าที่ผูกไว้'],
+      alerts: ['การแจ้งเตือน', 'เหตุการณ์ที่ระบบตรวจพบ ส่งต่อไปยัง n8n และ LINE Notify'],
+      settings: ['ตั้งค่ามิเตอร์', 'เพิ่ม แก้ไข หรือลบมิเตอร์และบ้านลูกค้า · ค่าที่ตั้งไว้จะถูกส่งไปสร้าง node ใน Node-RED']
+    };
+
+    return {
+      siteName: this.props.siteName ?? 'หมู่บ้านศรีสุข เฟส 2',
+      sensitivity: sens,
+      threshold: thr,
+      clock: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      nav,
+      viewTitle: titles[view][0],
+      viewSub: titles[view][1],
+      isOverview: view === 'overview',
+      isHomes: view === 'homes',
+      isMeters: view === 'meters',
+      isAlerts: view === 'alerts',
+      isSettings: view === 'settings',
+      devices, homes, homeStats, topUnits, alerts, hops, kpis, phases, bars,
+      deviceCount: devices.length,
+      homeCount: homes.length,
+      addNew, saveDraft, cancelDraft, draftFields, kindChips, statusChips,
+      draftOpen: !!d,
+      draftTitle: this.state.draftIndex >= 0 ? 'แก้ไข ' + dv.id + ' — ' + (dv.place || 'ไม่ระบุตำแหน่ง') : 'เพิ่มมิเตอร์ / บ้านลูกค้าใหม่',
+      lossNow, unbalance,
+      freq: f(50.0 + w(7, 0.04), 2)
+    };
+  }
+}
+</script>
+</body>
+</html>
